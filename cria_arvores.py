@@ -1,5 +1,4 @@
-
-
+import json
 
 class no_trie():
 
@@ -26,4 +25,15 @@ def adiciona_no(raiz, palavra: str):
             no.filhos.append(novo_no)
             no = novo_no
     no.palavra = True
+
+def cria_trie_dict(raiz):
+    dicionario = {}
+    with open('words_dictionary.json') as dicionario_json:
+        dicionario = json.load(dicionario_json)
+        for x in dicionario:
+            adiciona_no(raiz, x)
+    return raiz
+
+
+
 
