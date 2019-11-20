@@ -45,12 +45,11 @@ def busca(raiz, termo: str):
     termo_presente = True
     no = raiz
     for letra in termo:
-        if(not termo_presente): break
+        if not termo_presente: break
         termo_presente = False
         for filho in no.filhos:
-            if(letra == filho.letra):
+            if letra == filho.letra:
                 no = filho
                 termo_presente = True
                 break
-    return termo_presente
-
+    return no.palavra
