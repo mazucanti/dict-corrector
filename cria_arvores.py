@@ -41,3 +41,4 @@ def cria_trie_dict():
         adiciona_no(raiz, palavra)
     return raiz
 
+def busca(termo: str):
