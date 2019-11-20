@@ -1,4 +1,5 @@
 import json
+import requests
 
 class no_trie():
 
@@ -26,14 +27,17 @@ def adiciona_no(raiz, palavra: str):
             no = novo_no
     no.palavra = True
 
-def cria_trie_dict(raiz):
-    dicionario = {}
-    with open('words_dictionary.json') as dicionario_json:
-        dicionario = json.load(dicionario_json)
-        for x in dicionario:
-            adiciona_no(raiz, x)
+def importa_base_remota():
+    r = requests.get('https://raw.githubusercontent.com/mazucanti/dict-corrector/master/words_dictionary.json')
+    conteudo = r.content
+    dicionario = json.load(conteudo)
+    return dicionario
+
+
+def cria_trie_dict():
+    raiz = no_trie('*')
+    dicionario = importa_base_remota()
+    for palavra in dicionario:
+        adiciona_no(raiz, palavra)
     return raiz
-
-
-
 
