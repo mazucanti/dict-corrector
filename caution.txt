@@ -1,0 +1,3 @@
+We should remember to convert the words into lowercase before searching it in the tree
+
+Arrows are behaving really strangely in corrector mode (extended ASCII symbols 'o')
