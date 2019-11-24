@@ -2,7 +2,7 @@ import json
 import requests
 
 
-class no_trie():
+class trie_node():
 
     def __init__(self, letra: str):
         self.letra = letra
@@ -23,7 +23,7 @@ def adiciona_no(raiz, palavra: str):
                 break
 
         if not e_filho:
-            novo_no = no_trie(letra)
+            novo_no = trie_node(letra)
             no.filhos.append(novo_no)
             no = novo_no
     no.palavra = True
@@ -36,7 +36,7 @@ def importa_base_remota():
 
 
 def cria_trie_dict():
-    raiz = no_trie('*')
+    raiz = trie_node('*')
     dicionario = importa_base_remota()
     for palavra in dicionario:
         adiciona_no(raiz, palavra)
