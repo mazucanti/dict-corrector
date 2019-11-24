@@ -43,7 +43,7 @@ def trie_tree():
     return root
 
 
-def search(root, term: str):
+def search(root: trie_node, term: str) -> bool:
     found = True
     node = root
     for letter in term:

@@ -5,10 +5,10 @@ def gen_sugg(word: str):
     root = trees.trie_tree()
     node = root
     found = trees.search(node, word)
+    valid_letters = ""
     if found:
-        return ""
+        return valid_letters
     if not found:
-        valid_letters = ""
         for letter in word:
             reff = node.copy()
             for child in node.children:
@@ -23,7 +23,7 @@ def write_sugg(node, word):
     max_count = 0
     while not node.word:
         for child in node.children:
-            if max_count<child.count:
+            if max_count < child.count:
                 max_count = child.count
                 max_node = child
         word += max_node.letter
