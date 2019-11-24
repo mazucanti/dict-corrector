@@ -1,5 +1,5 @@
-import cria_arvores
+import trees
 
 
-avere = cria_arvores.cria_trie_dict()
-print(cria_arvores.busca(avere, 'spear'))
+avere = trees.cria_trie_dict()
+print(trees.busca(avere, 'spear'))
