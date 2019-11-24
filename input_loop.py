@@ -59,7 +59,7 @@ def exit_routine(stdscr, mode_being_exited):
                 return False
 
 
-def print_corrector_screen(stdscr, phrase, current_word, current_suggestions, suggestion_cursor):
+def print_corrector_screen(stdscr, phrase, current_word, current_suggestions, suggestion_cursor, word_cursor):
     stdscr.clear()                                          # Clears the screen
 
     # Print suggestion window
@@ -85,14 +85,18 @@ def print_corrector_screen(stdscr, phrase, current_word, current_suggestions, su
 
     stdscr.move(0, 0)
 
-    for string in phrase:
-        if string[1] == False:
+    for i, string in enumerate(phrase):
+        if i == len(phrase) + word_cursor:
+            if string[1] == False:
+                stdscr.addstr(string[0], curses.color_pair(3))
+            else:
+                stdscr.addstr(string[0], curses.color_pair(1))
+        elif string[1] == False:
             stdscr.addstr(string[0], curses.color_pair(2))
         else:
             stdscr.addstr(string[0])
 
     stdscr.addstr(current_word, curses.A_UNDERLINE)         # Prints the word currently being wrote underlined
-    # stdscr.addstr(current_word, curses.color_pair(1))     # Alternatively prints with a white box around it
 
     stdscr.refresh()                                        # Updates the screen
 
@@ -126,8 +130,11 @@ def corrector_mode(stdscr):
 
 
     while 1:
-        current_autocomplete_suggestions = autocomplete(unfinished_word.lower())
-        print_corrector_screen(stdscr, phrase, unfinished_word, current_autocomplete_suggestions, suggestion_cursor)
+        if word_cursor == 0:
+            current_autocomplete_suggestions = autocomplete(unfinished_word.lower())
+        else:
+            current_autocomplete_suggestions = phrase[word_cursor][2]
+        print_corrector_screen(stdscr, phrase, unfinished_word, current_autocomplete_suggestions, suggestion_cursor, word_cursor)
 
         key = stdscr.getch()    # Gets the code for the key the user pressed (either an ASCII code or a special curses code)
 
@@ -136,52 +143,64 @@ def corrector_mode(stdscr):
 
         if key == 9: # TAB
             suggestion_cursor = (suggestion_cursor % 3) + 1
-        '''
-        elif key == curses.KEY_LEFT:
-            word_cursor
-        '''
-        elif (key == curses.KEY_ENTER or key in [10, 13]) and suggestion_cursor != 0: # Enter
-            unfinished_word = current_autocomplete_suggestions[suggestion_cursor-1]
+
+        elif (key == curses.KEY_ENTER or key in [10, 13]) and suggestion_cursor != 0:       # Enter
+            if word_cursor == 0:
+                unfinished_word = current_autocomplete_suggestions[suggestion_cursor-1]
+            else:
+                phrase[word_cursor] = [current_autocomplete_suggestions[suggestion_cursor-1], True, []]
             suggestion_cursor = 0
         else:
             suggestion_cursor = 0
 
-            # ESC will be used to exit the mode
-            if key == 27:                                           # ESC ASCII code
-                curses.curs_set(0)                                  # Turns off cursor visualization
-                if not exit_routine(stdscr, 'corrector mode'):      # If the user confirms the exit, breaks from the correctors loop
-                    break
-                else:
-                    curses.curs_set(1)                              # if the user cancels the exit, turns on cursor visualization again
+            if key == curses.KEY_LEFT:
+                if word_cursor == 0 and is_a_letter((phrase[-1][0][-1])):
+                    word_cursor = -1
+                elif -(word_cursor - 2) <= len(phrase):
+                    word_cursor -= 2
+            elif key == curses.KEY_RIGHT:
+                if word_cursor < 0:
+                    word_cursor += 2
 
-            # Implements backspace/delete functionality
-            elif key in [8, 127, 263]:                               # Backspace and Delete ASCII codes
-                if unfinished_word != '':                       # If the user was writing a word
-                    unfinished_word = unfinished_word[0:-1]     # Deleted the last character of the unfinished word
-
-                elif phrase != []:                                                  # Else if there's something to be deleted
-                    phrase[-1][0] = phrase[-1][0][:-1]
-                    if phrase[-1][0] == '':
-                        phrase.pop()
-                        last_word_written = phrase.pop()
-                        unfinished_word = last_word_written[0]
-
-            # If the user did not type a letter
-            elif not is_a_letter(key):
-                if unfinished_word != '':
-                    correction_needed, sugestions = is_right(unfinished_word)
-                    phrase.append([unfinished_word, correction_needed, sugestions])
-                    phrase.append([chr(key), True, []])
-                    unfinished_word = ''                    # Resets the current word
-                else:
-                    if phrase == []:
-                        phrase.append(['', True, []])
-                    phrase[-1][0] = phrase[-1][0] + chr(key)
-
-            # If the user typed a letter
             else:
-                suggestion_cursor = 0
-                unfinished_word += chr(key)     # Adds if to the word currently being wrote
+                word_cursor = 0
+
+                # ESC will be used to exit the mode
+                if key == 27:                                           # ESC ASCII code
+                    curses.curs_set(0)                                  # Turns off cursor visualization
+                    if not exit_routine(stdscr, 'corrector mode'):      # If the user confirms the exit, breaks from the correctors loop
+                        break
+                    else:
+                        curses.curs_set(1)                              # if the user cancels the exit, turns on cursor visualization again
+
+                # Implements backspace/delete functionality
+                elif key in [8, 127, 263]:                               # Backspace and Delete ASCII codes
+                    if unfinished_word != '':                       # If the user was writing a word
+                        unfinished_word = unfinished_word[0:-1]     # Deleted the last character of the unfinished word
+
+                    elif phrase != []:                                                  # Else if there's something to be deleted
+                        phrase[-1][0] = phrase[-1][0][:-1]
+                        if phrase[-1][0] == '':
+                            phrase.pop()
+                            last_word_written = phrase.pop()
+                            unfinished_word = last_word_written[0]
+
+                # If the user did not type a letter
+                elif not is_a_letter(key):
+                    if unfinished_word != '':
+                        correction_needed, sugestions = is_right(unfinished_word)
+                        phrase.append([unfinished_word, correction_needed, sugestions])
+                        phrase.append([chr(key), True, []])
+                        unfinished_word = ''                    # Resets the current word
+                    else:
+                        if phrase == []:
+                            phrase.append(['', True, []])
+                        phrase[-1][0] = phrase[-1][0] + chr(key)
+
+                # If the user typed a letter
+                else:
+                    suggestion_cursor = 0
+                    unfinished_word += chr(key)     # Adds if to the word currently being wrote
 
 ''' Enter the right mode depending on the user choice
     
@@ -202,6 +221,7 @@ def main(stdscr):
     curses.curs_set(0)  # Makes the cursor invisible
     curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_WHITE)  # Initialize a color pair (code, text_color, background_color)
     curses.init_pair(2, curses.COLOR_WHITE, curses.COLOR_RED)
+    curses.init_pair(3, curses.COLOR_BLACK, curses.COLOR_MAGENTA)
 
     menu_cursor_index = 0
 

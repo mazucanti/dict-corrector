@@ -1,3 +1,7 @@
+string = 'alfabeto'
+
+print(string[-0])
+'''
 import curses
 
 def main(stdscr):
@@ -7,3 +11,4 @@ def main(stdscr):
         stdscr.addstr(0,0,str(key))
         stdscr.refresh()
 curses.wrapper(main)
+'''
