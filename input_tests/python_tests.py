@@ -1,6 +1,9 @@
-key = 100
+import curses
 
-phrase = [['test', True, []], ['another', True, []]]
-
-phrase[-1][0] = phrase[-1][0] + chr(key)
-print(phrase[-1][0])
+def main(stdscr):
+    while (1):
+        key = stdscr.getch()
+        stdscr.clear()
+        stdscr.addstr(0,0,str(key))
+        stdscr.refresh()
+curses.wrapper(main)
