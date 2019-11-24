@@ -107,17 +107,18 @@ def is_a_letter(char):
         return False
 
 def is_right(word):
-    return False, ['sugestion1', 'sugestion2', 'sugestion3']
+    return False, ['suggestion1', 'suggestion2', 'suggestion3']
     return True, []
 
 def autocomplete(word_beginning):
-    return ['sugestion1', 'sugestion2', 'sugestion3']
+    return ['suggestion1', 'suggestion2', 'suggestion3']
 
 ''' '''
 def corrector_mode(stdscr):
     curses.curs_set(1)      # Turns the cursor visualization on
     unfinished_word = ''    # Variable that holds the word that is currently being wrote
     suggestion_cursor = 0
+    word_cursor = 0
     # Phrase is a list of the words already written by the user
     # each of its elements hold another list in the form of
     # ['word', True/False (if False, it means the word was misspelled), [] (a list of possible corrections)
@@ -135,9 +136,12 @@ def corrector_mode(stdscr):
 
         if key == 9: # TAB
             suggestion_cursor = (suggestion_cursor % 3) + 1
-        elif (key == curses.KEY_ENTER or key in [10,13]) and suggestion_cursor != 0: # Enter
-            phrase.append([current_autocomplete_suggestions[suggestion_cursor-1], True, []])
-            unfinished_word = ''
+        '''
+        elif key == curses.KEY_LEFT:
+            word_cursor
+        '''
+        elif (key == curses.KEY_ENTER or key in [10, 13]) and suggestion_cursor != 0: # Enter
+            unfinished_word = current_autocomplete_suggestions[suggestion_cursor-1]
             suggestion_cursor = 0
         else:
             suggestion_cursor = 0
