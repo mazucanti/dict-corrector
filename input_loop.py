@@ -62,7 +62,14 @@ def exit_routine(stdscr, mode_being_exited):
 def print_corrector_screen(stdscr, phrase, current_word):
     stdscr.clear()                                          # Clears the screen
 
-    stdscr.addstr(0, 0, phrase)                             # Prints the old phrase
+    stdscr.move(0, 0)
+
+    for string in phrase:
+        if string[1] == False:
+            stdscr.addstr(string[0], curses.color_pair(2))
+        else:
+            stdscr.addstr(string[0])
+
     stdscr.addstr(current_word, curses.A_UNDERLINE)         # Prints the word currently being wrote underlined
     # stdscr.addstr(current_word, curses.color_pair(1))     # Alternatively prints with a white box around it
 
@@ -78,26 +85,20 @@ def is_a_letter(char):
     else:
         return False
 
-''' Receives a string ended in letters
-    Returns the text until the last word and the last word '''
-def split_on_last_word(text):
-    i = -1
-
-    # While the current character is a letter and the start of the string was not reached
-    while is_a_letter(ord(text[i])) and len(text) + i > 0:
-        i -= 1
-
-    # This resolves a problem with the intervals when the split location is in the beginning of the text
-    # because text[0:0] = text[0] != ''
-    if len(text) + i == 0:
-        return '', text
-    return text[0:i + 1], text[i + 1:]
+def is_right(word):
+    return False, ['sugestion1', 'sugestion2', 'sugestion3']
+    return True, []
 
 ''' '''
 def corrector_mode(stdscr):
     curses.curs_set(1)      # Turns the cursor visualization on
     unfinished_word = ''    # Variable that holds the word that is currently being wrote
-    phrase = ''             # Variable that holds the rest of the text
+    # current_autocomplete_suggestions = []
+    # Phrase is a list of the words already written by the user
+    # each of its elements hold another list in the form of
+    # ['word', True/False (if False, it means the word was misspelled), [] (a list of possible corrections)
+    phrase = []
+
 
     while 1:
         print_corrector_screen(stdscr, phrase, unfinished_word)
@@ -120,23 +121,27 @@ def corrector_mode(stdscr):
             if unfinished_word != '':                       # If the user was writing a word
                 unfinished_word = unfinished_word[0:-1]     # Deleted the last character of the unfinished word
 
-            elif phrase != '':                                                  # Else if there's something to be deleted
-                if not (is_a_letter(ord(phrase[-1]))):                          # If the current last character is not a letter
-                    phrase = phrase[0:-1]                                       # Just delete it
-                    if is_a_letter(ord(phrase[-1])):                            # If the new last character is a letter
-                        phrase, unfinished_word = split_on_last_word(phrase)    # Updates the word being wrote and the rest of the text
-                else:                                                           # Else if the current last character is a letter
-                    unfinished_word = unfinished_word[0:-1]                     # Just delete it
+            elif phrase != []:                                                  # Else if there's something to be deleted
+                phrase[-1][0] = phrase[-1][0][:-1]
+                if phrase[-1][0] == '':
+                    phrase.pop()
+                    last_word_written = phrase.pop()
+                    unfinished_word = last_word_written[0]
 
         # If the user did not type a letter
         elif not is_a_letter(key):
-            phrase += unfinished_word + chr(key)    # Finishes the word being wrote and updates the text with it
-            unfinished_word = ''                    # Resets the current word
+            if unfinished_word != '':
+                correction_needed, sugestions = is_right(unfinished_word)
+                phrase.append([unfinished_word, correction_needed, sugestions])
+                phrase.append([chr(key), True, []])
+                unfinished_word = ''                    # Resets the current word
+            else:
+                phrase[-1][0] = phrase[-1][0] + chr(key)
 
         # If the user typed a letter
         else:
             unfinished_word += chr(key)     # Adds if to the word currently being wrote
-
+            #current_autocomplete_suggestion = autocomplete(unfinished_word)
 
 ''' Enter the right mode depending on the user choice
     
@@ -156,6 +161,7 @@ def selected_menu_option(stdscr, user_choice):
 def main(stdscr):
     curses.curs_set(0)  # Makes the cursor invisible
     curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_WHITE)  # Initialize a color pair (code, text_color, background_color)
+    curses.init_pair(2, curses.COLOR_WHITE, curses.COLOR_RED)
 
     menu_cursor_index = 0
 
