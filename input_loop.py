@@ -133,8 +133,12 @@ def corrector_mode(stdscr):
         # This block takes a different action depending on the user input
         # It also implements the usual behavior of special keys
 
-        if key == 9:
+        if key == 9: # TAB
             suggestion_cursor = (suggestion_cursor % 3) + 1
+        elif (key == curses.KEY_ENTER or key in [10,13]) and suggestion_cursor != 0: # Enter
+            phrase.append([current_autocomplete_suggestions[suggestion_cursor-1], True, []])
+            unfinished_word = ''
+            suggestion_cursor = 0
         else:
             suggestion_cursor = 0
 
