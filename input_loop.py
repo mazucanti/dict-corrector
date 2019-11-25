@@ -1,4 +1,5 @@
 import curses
+import trees, suggest
 
 main_menu_options = {'Corrector': 0, 'Dictionary': 1, 'Credits': 2,
                      'Exit': 3}  # Variable that holds the main menu options
@@ -71,19 +72,19 @@ def print_corrector_screen(stdscr, phrase, current_word, current_suggestions, su
 
     if current_suggestions != []:
         if suggestion_cursor == 1:
-            stdscr.addstr(h-2, 1, current_suggestions[0], curses.color_pair(1))
+            stdscr.addstr(h - 2, 1, current_suggestions[0], curses.color_pair(1))
         else:
             stdscr.addstr(h - 2, 1, current_suggestions[0])
     if len(current_suggestions) >= 2:
         if suggestion_cursor == 2:
-            stdscr.addstr(h-2, w//2 - len(current_suggestions[1])//2, current_suggestions[1], curses.color_pair(1))
+            stdscr.addstr(h - 2, w//2 - len(current_suggestions[1])//2, current_suggestions[1], curses.color_pair(1))
         else:
             stdscr.addstr(h - 2, w // 2 - len(current_suggestions[1]) // 2, current_suggestions[1])
     if len(current_suggestions) >= 3:
         if suggestion_cursor == 3:
             stdscr.addstr(h - 2, w - len(current_suggestions[2]) - 1, current_suggestions[2], curses.color_pair(1))
         else:
-            stdscr.addstr(h-2, w - len(current_suggestions[2])-1, current_suggestions[2])
+            stdscr.addstr(h - 2, w - len(current_suggestions[2])-1, current_suggestions[2])
 
     stdscr.move(0, 0)
 
@@ -112,15 +113,14 @@ def is_a_letter(char):
     else:
         return False
 
-def is_right(word):
-    return False, ['suggestion1', 'suggestion2', 'suggestion3']
-    return True, []
+def is_right(root, word):
+    return suggest.gen_sugg(root, word)
 
-def autocomplete(word_beginning):
-    return ['suggestion1', 'suggestion2', 'suggestion3']
+def autocomplete(root, word_beginning):
+    return suggest.gen_sugg(root, word_beginning)[1]
 
 ''' '''
-def corrector_mode(stdscr):
+def corrector_mode(stdscr, root):
     curses.curs_set(1)      # Turns the cursor visualization on
     unfinished_word = ''    # Variable that holds the word that is currently being wrote
     suggestion_cursor = 0
@@ -133,7 +133,7 @@ def corrector_mode(stdscr):
 
     while 1:
         if word_cursor == 0:
-            current_autocomplete_suggestions = autocomplete(unfinished_word.lower())
+            current_autocomplete_suggestions = autocomplete(root, unfinished_word.lower())
         else:
             current_autocomplete_suggestions = phrase[word_cursor][2]
         print_corrector_screen(stdscr, phrase, unfinished_word, current_autocomplete_suggestions, suggestion_cursor, word_cursor)
@@ -191,8 +191,8 @@ def corrector_mode(stdscr):
                 # If the user did not type a letter
                 elif not is_a_letter(key):
                     if unfinished_word != '':
-                        correction_needed, sugestions = is_right(unfinished_word)
-                        phrase.append([unfinished_word, correction_needed, sugestions])
+                        word_is_correct, suggestions = is_right(root, unfinished_word)
+                        phrase.append([unfinished_word, word_is_correct, suggestions])
                         phrase.append([chr(key), True, []])
                         unfinished_word = ''                    # Resets the current word
                     else:
@@ -209,9 +209,9 @@ def corrector_mode(stdscr):
     
     Receives the user choice
     Returns False if the program should be ended and True otherwise '''
-def selected_menu_option(stdscr, user_choice):
+def selected_menu_option(stdscr, user_choice, root):
     if user_choice == main_menu_options['Corrector']:
-        corrector_mode(stdscr)
+        corrector_mode(stdscr, root)
         return True
     elif user_choice == main_menu_options['Dictionary']:
         return True
@@ -226,6 +226,7 @@ def main(stdscr):
     curses.init_pair(2, curses.COLOR_WHITE, curses.COLOR_RED)
     curses.init_pair(3, curses.COLOR_BLACK, curses.COLOR_MAGENTA)
 
+    root = trees.trie_tree()
     menu_cursor_index = 0
 
     while (1):
@@ -238,7 +239,7 @@ def main(stdscr):
         elif key == curses.KEY_DOWN:
             menu_cursor_index = (menu_cursor_index + 1) % len(main_menu_options)
         elif key == curses.KEY_ENTER or key in [10, 13]:  # Some times just curses.KEY_ENTER don't work, I was advised to put these other conditions
-            if not selected_menu_option(stdscr, menu_cursor_index):
+            if not selected_menu_option(stdscr, menu_cursor_index, root):
                 break
 
 
