@@ -1,8 +1,7 @@
 import trees
 
 
-def gen_sugg(word: str):
-    root = trees.trie_tree()
+def gen_sugg(root, word: str):
     node = root
     found = trees.search(node, word)
     valid_letters = ""
