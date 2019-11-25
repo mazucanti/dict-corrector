@@ -73,11 +73,13 @@ def print_corrector_screen(stdscr, phrase, current_word, current_suggestions, su
         if suggestion_cursor == 1:
             stdscr.addstr(h-2, 1, current_suggestions[0], curses.color_pair(1))
         else:
-            stdscr.addstr(h-2, 1, current_suggestions[0])
+            stdscr.addstr(h - 2, 1, current_suggestions[0])
+    if len(current_suggestions) >= 2:
         if suggestion_cursor == 2:
             stdscr.addstr(h-2, w//2 - len(current_suggestions[1])//2, current_suggestions[1], curses.color_pair(1))
         else:
-            stdscr.addstr(h-2, w//2 - len(current_suggestions[1])//2, current_suggestions[1])
+            stdscr.addstr(h - 2, w // 2 - len(current_suggestions[1]) // 2, current_suggestions[1])
+    if len(current_suggestions) >= 3:
         if suggestion_cursor == 3:
             stdscr.addstr(h - 2, w - len(current_suggestions[2]) - 1, current_suggestions[2], curses.color_pair(1))
         else:
@@ -143,7 +145,7 @@ def corrector_mode(stdscr):
 
         if key == 9: # TAB
             if current_autocomplete_suggestions != []:
-                suggestion_cursor = (suggestion_cursor % 3) + 1
+                suggestion_cursor = (suggestion_cursor % len(current_autocomplete_suggestions)) + 1
 
         elif (key == curses.KEY_ENTER or key in [10, 13]) and suggestion_cursor != 0:       # Enter
             if word_cursor == 0:
