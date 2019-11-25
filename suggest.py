@@ -25,14 +25,16 @@ def gen_sugg(root, word: str):
 
 
 def write_sugg(node):
+    count = 0
     max_count = 0
     word = ""
     max_node = trees.trie_node("")
-    while not node.word:
+    while not node.word and count < 70:
         for child in node.children:
             if max_count < child.count:
                 max_count = child.count
                 max_node = child
         word += max_node.letter
         node = max_node
+        count += 1
     return word
