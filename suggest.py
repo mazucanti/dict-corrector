@@ -33,6 +33,28 @@ def gen_sugg(root, word: str):
         final_word = valid_letters + write_sugg(node)
         return [final_word]
 
+def is_right(root, word):
+    found = trees.search(root, word)
+
+    if found:
+        return True, []
+    else:
+        suggestion = ''
+        for letter in word:
+            max_node = trees.trie_tree('')
+            letter_found = False
+            for child in root.children:
+                if max_node.count <= child.count:
+                    max_node = child
+                if child.letter == letter:
+                    suggestion += letter
+                    root = child
+                    letter_found = True
+                    break
+            if not letter_found:
+                suggestion += max_node.letter
+                root = max_node
+
 
 def write_sugg(node):
     count = 0
