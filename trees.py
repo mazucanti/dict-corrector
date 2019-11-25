@@ -19,6 +19,7 @@ def add_node(root, word: str):
             if child.letter == letter:
                 child.count += 1
                 is_child = True
+                node = child
                 break
         if not is_child:
             new_node = trie_node(letter)
@@ -57,4 +58,4 @@ def search(root: trie_node, term: str) -> bool:
                 node = child
                 found = True
                 break
-    return
+    return node.word
