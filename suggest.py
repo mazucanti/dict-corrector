@@ -20,7 +20,7 @@ def gen_sugg(root, word: str):
                     break
             if end_of_valid_letters:
                     break
-        final_word = valid_letters
+        final_word = valid_letters + write_sugg(node)
         return final_word
 
 
