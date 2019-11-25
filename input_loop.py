@@ -6,6 +6,16 @@ main_menu_options = {'Corrector': 0, 'Dictionary': 1, 'Credits': 2,
 exit_options = {'No': 0, 'Yes': 1}  # Variable that hold the exit menu options
 
 
+def print_loading_screen(stdscr):
+    stdscr.clear()
+
+    h, w = stdscr.getmaxyx()
+    message = 'Loading trie tree...'
+
+    stdscr.addstr(h//2, w//2 - len(message)//2, message, curses.A_BLINK)
+
+    stdscr.refresh()
+
 def print_menu(stdscr, selected_menu_row):
     stdscr.clear()
 
@@ -191,7 +201,7 @@ def corrector_mode(stdscr, root):
                 # If the user did not type a letter
                 elif not is_a_letter(key):
                     if unfinished_word != '':
-                        word_is_correct, suggestions = is_right(root, unfinished_word)
+                        word_is_correct, suggestions = is_right(root, unfinished_word.lower())
                         phrase.append([unfinished_word, word_is_correct, suggestions])
                         phrase.append([chr(key), True, []])
                         unfinished_word = ''                    # Resets the current word
@@ -203,7 +213,7 @@ def corrector_mode(stdscr, root):
                 # If the user typed a letter
                 else:
                     suggestion_cursor = 0
-                    unfinished_word += chr(key)     # Adds if to the word currently being wrote
+                    unfinished_word += chr(key)     # Adds if to the word currently being written
 
 ''' Enter the right mode depending on the user choice
     
@@ -226,6 +236,7 @@ def main(stdscr):
     curses.init_pair(2, curses.COLOR_WHITE, curses.COLOR_RED)
     curses.init_pair(3, curses.COLOR_BLACK, curses.COLOR_MAGENTA)
 
+    print_loading_screen(stdscr)
     root = trees.trie_tree()
     menu_cursor_index = 0
 
