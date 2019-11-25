@@ -6,10 +6,8 @@ def gen_sugg(root, word: str):
     found = trees.search(node, word)
     valid_letters = ""
     if found:
-        print('found')
-        return ""
+        return [""]
     if not found:
-        print('not found')
         for letter in word:
             end_of_valid_letters = True
             for child in node.children:
@@ -21,7 +19,7 @@ def gen_sugg(root, word: str):
             if end_of_valid_letters:
                     break
         final_word = valid_letters + write_sugg(node)
-        return final_word
+        return [final_word]
 
 
 def write_sugg(node):
