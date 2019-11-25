@@ -51,7 +51,7 @@ def search(root: trie_node, term: str) -> bool:
     node = root
     for letter in term:
         if not found:
-            return False
+            break
         found = False
         for child in node.children:
             if letter == child.letter:
