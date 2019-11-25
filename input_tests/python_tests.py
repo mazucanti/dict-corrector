@@ -1,6 +1,8 @@
-string = 'alfabeto'
+string = []
 
-print(string[-0])
+4 % len(string)
+
+
 '''
 import curses
 
