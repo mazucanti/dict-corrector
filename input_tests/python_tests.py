@@ -1,9 +1,3 @@
-string = []
-
-4 % len(string)
-
-
-'''
 import curses
 
 def main(stdscr):
@@ -13,4 +7,3 @@ def main(stdscr):
         stdscr.addstr(0,0,str(key))
         stdscr.refresh()
 curses.wrapper(main)
-'''

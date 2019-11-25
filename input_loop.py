@@ -1,8 +1,7 @@
 import curses
 import trees, suggest
 
-main_menu_options = {'Corrector': 0, 'Dictionary': 1, 'Credits': 2,
-                     'Exit': 3}  # Variable that holds the main menu options
+main_menu_options = {'Start': 0, 'Guide': 1, 'Credits': 2, 'Close': 3}  # Variable that holds the main menu options
 exit_options = {'No': 0, 'Yes': 1}  # Variable that hold the exit menu options
 
 
@@ -76,15 +75,23 @@ def print_corrector_screen(stdscr, phrase, current_word, current_suggestions, su
     # Print suggestion window
     h, w = stdscr.getmaxyx()
 
+    if suggestion_cursor != 0:
+        stdscr.addstr(h-5, 2, 'Definition of \"'+current_suggestions[suggestion_cursor-1].lower()+'\" at: ', curses.A_BOLD)
+        stdscr.addstr(h-4, 2, 'https://www.lexico.com/en/definition/'+current_suggestions[suggestion_cursor-1].lower(), curses.A_UNDERLINE)
+    elif word_cursor != 0 and phrase[word_cursor][1] == True:
+        stdscr.addstr(h-5, 2, 'Definition of \"'+phrase[word_cursor][0].lower()+'\" at: ', curses.A_BOLD)
+        stdscr.addstr(h-4, 2, 'https://www.lexico.com/en/definition/'+phrase[word_cursor][0].lower(), curses.A_UNDERLINE)
+
+
     stdscr.move(h-3, 0)
     for i in range(w):
         stdscr.addch('_')
 
     if current_suggestions != []:
         if suggestion_cursor == 1:
-            stdscr.addstr(h - 2, 1, current_suggestions[0], curses.color_pair(1))
+            stdscr.addstr(h - 2, 2, current_suggestions[0], curses.color_pair(1))
         else:
-            stdscr.addstr(h - 2, 1, current_suggestions[0])
+            stdscr.addstr(h - 2, 2, current_suggestions[0])
     if len(current_suggestions) >= 2:
         if suggestion_cursor == 2:
             stdscr.addstr(h - 2, w//2 - len(current_suggestions[1])//2, current_suggestions[1], curses.color_pair(1))
@@ -92,9 +99,9 @@ def print_corrector_screen(stdscr, phrase, current_word, current_suggestions, su
             stdscr.addstr(h - 2, w // 2 - len(current_suggestions[1]) // 2, current_suggestions[1])
     if len(current_suggestions) >= 3:
         if suggestion_cursor == 3:
-            stdscr.addstr(h - 2, w - len(current_suggestions[2]) - 1, current_suggestions[2], curses.color_pair(1))
+            stdscr.addstr(h - 2, w - len(current_suggestions[2]) - 2, current_suggestions[2], curses.color_pair(1))
         else:
-            stdscr.addstr(h - 2, w - len(current_suggestions[2])-1, current_suggestions[2])
+            stdscr.addstr(h - 2, w - len(current_suggestions[2]) - 2, current_suggestions[2])
 
     stdscr.move(0, 0)
 
@@ -124,10 +131,10 @@ def is_a_letter(char):
         return False
 
 def is_right(root, word):
-    return suggest.gen_sugg(root, word)
+    return suggest.is_right(root, word)
 
 def autocomplete(root, word_beginning):
-    return suggest.gen_sugg(root, word_beginning)[1]
+    return suggest.gen_sugg(root, word_beginning)
 
 ''' '''
 def corrector_mode(stdscr, root):
@@ -153,7 +160,10 @@ def corrector_mode(stdscr, root):
         # This block takes a different action depending on the user input
         # It also implements the usual behavior of special keys
 
-        if key == 9: # TAB
+        if key in [263, 265, 266, 267, 268, 269, 270, 271, 272, 273, 274, 258, 259]:
+            None
+
+        elif key == 9: # TAB
             if current_autocomplete_suggestions != []:
                 suggestion_cursor = (suggestion_cursor % len(current_autocomplete_suggestions)) + 1
 
@@ -167,7 +177,7 @@ def corrector_mode(stdscr, root):
             suggestion_cursor = 0
 
             if key == curses.KEY_LEFT:
-                if word_cursor == 0 and is_a_letter((phrase[-1][0][-1])):
+                if word_cursor == 0 and phrase != [] and is_a_letter((phrase[-1][0][-1])):
                     word_cursor = -1
                 elif -(word_cursor - 2) <= len(phrase):
                     word_cursor -= 2
@@ -195,8 +205,9 @@ def corrector_mode(stdscr, root):
                         phrase[-1][0] = phrase[-1][0][:-1]
                         if phrase[-1][0] == '':
                             phrase.pop()
-                            last_word_written = phrase.pop()
-                            unfinished_word = last_word_written[0]
+                            if phrase != []:
+                                last_word_written = phrase.pop()
+                                unfinished_word = last_word_written[0]
 
                 # If the user did not type a letter
                 elif not is_a_letter(key):
@@ -215,17 +226,58 @@ def corrector_mode(stdscr, root):
                     suggestion_cursor = 0
                     unfinished_word += chr(key)     # Adds if to the word currently being written
 
+
+def guide(stdscr):
+    return True
+
+def credits(stdscr):
+    stdscr.clear()
+    class_name = 'Algoritmos e Estruturas de Dados II - A1 - 2019.3'
+    professor = 'Carlo Kleber da Silva Rodrigues'
+    title = 'Dictionary and Text Corrector utilizing Trie Trees'
+    students = ['Barbara Dias de Sena', 'Daniel Mazucanti Domingos', 'Pedro Regio Shoji', 'Sergio Pereira Oliveira']
+    ra = ['11.2017.21899', '11.2017.21603', '11.2017.21028', '11.2017.21122']
+    dictionary = 'Dictionary definitions by \"Lexico\", english online dictionary powered by Oxford'
+    dictionary_url = 'https://www.lexico.com/en'
+
+    name_ra = []
+    for i in range(len(students)):
+        length = 26 - len(students[i])
+        length += 13
+        name_ra.append(students[i]+length*'_'+ra[i])
+
+    h, w = stdscr.getmaxyx()
+
+    stdscr.addstr(0, w//2 - len(class_name)//2, class_name, curses.A_BOLD)
+    stdscr.addstr(h//32 + 1, w//2 - len(title)//2, title)
+
+    stdscr.addstr(h//4, w//2 - len(professor)//2, professor)
+
+    for i in range (len(students)):
+        stdscr.addstr(h//2 - len(name_ra)//2 + i, w//2 - len(name_ra[i])//2, name_ra[i])
+
+    stdscr.addstr(h-3, w - len(dictionary) - 2, dictionary)
+    stdscr.addstr(h-2, w - len(dictionary_url) - 2, dictionary_url)
+
+
+    stdscr.refresh()
+
+    stdscr.getch()
+
+
 ''' Enter the right mode depending on the user choice
     
     Receives the user choice
     Returns False if the program should be ended and True otherwise '''
 def selected_menu_option(stdscr, user_choice, root):
-    if user_choice == main_menu_options['Corrector']:
+    if user_choice == main_menu_options['Start']:
         corrector_mode(stdscr, root)
         return True
-    elif user_choice == main_menu_options['Dictionary']:
+    elif user_choice == main_menu_options['Guide']:
+        guide(stdscr)
         return True
     elif user_choice == main_menu_options['Credits']:
+        credits(stdscr)
         return True
     else:
         return exit_routine(stdscr, 'program');
@@ -262,15 +314,3 @@ def main(stdscr):
     More information at
     https://docs.python.org/3/howto/curses.html#starting-and-ending-a-curses-application'''
 curses.wrapper(main)
-
-'''
-Could be separated in different files
-
-Should change the exiting method (returning false is really scretchy)
-
-There is a strange delay when pressing 'ESC' in corrector mode
-
-Probably the variable phrase (that holds everything the user has already writed and confirmed) should be a dictionary, so that later we can mark it as an spelling error.
-
-Implement a quick guide when entering a mode
-'''
