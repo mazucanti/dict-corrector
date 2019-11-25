@@ -3,12 +3,22 @@ import trees
 
 def gen_sugg(root, word: str):
     if word == "":
-        return True, []
+        return []
     node = root
     found = trees.search(node, word)
     valid_letters = ""
     if found:
-        return []
+        count = 0
+        for letter in word:
+            if node.word == True and count == len(word)-1:
+                break
+            for child in node.children:
+                if child.letter == letter:
+                    node = child
+                    break
+            count += 1
+        final_word = word + write_sugg(node)
+        return [final_word]
     if not found:
         for letter in word:
             end_of_valid_letters = True
@@ -20,9 +30,8 @@ def gen_sugg(root, word: str):
                     break
             if end_of_valid_letters:
                     break
-        final_word = valid_letters #+ write_sugg(node)
+        final_word = valid_letters + write_sugg(node)
         return [final_word]
-
 
 
 def write_sugg(node):
